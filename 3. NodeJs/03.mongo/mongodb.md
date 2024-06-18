@@ -1,0 +1,33 @@
+## Bases de datos y colecciones
+
+MongoDB almacena datos a traves de documentos (documentos BSON), los cuales son agrupados en colecciones. Una base de datos almacena una o mas colecciones de documentos.
+
+### Colecciones
+
+Las colecciones se pueden asociar a lo que son las tablas en las bases de datos relacionales.
+
+### Documentos
+
+BSON es una representacion binaria de un documento JSON.
+
+    {
+        field1: value1,
+        field2: value2,
+        ...
+        fieldN: valueN
+    }
+
+El valor de un campo puede ser cualquier tipo de dato BSON, soportado, incluidos otros documentos.
+
+    var mydoc = {
+        _id: ObjectId("5098922343424f391"),
+        name: {first: "Alan", last: "Turing"},
+        contribs: ["Turing Machine", "Turing Test"],
+        views: NumberLong(12500000)
+    }
+
+#### Campos
+
+- El nombre de campo _id esta reservado para la llave primaria.
+- El servidor permite nombres de campos que contengan el caracter ($) y (.).
+- Los nombres de los campos no pueden contener el valor null.
