@@ -16,6 +16,7 @@ const databaseName = 'notesApp'
  */
 const url = `mongodb+srv://martindotdev:${password}@fullstackopencluster.asrmplj.mongodb.net/${databaseName}?retryWrites=true&w=majority&appName=FullStackOpenCluster`
 
+// Esta configuracion se relaciona con la forma en que mongoose maneja las consultas que contienen campos no definidos en el esquema del modelo
 mongoose.set('strictQuery', false)
 
 // Definicion de la conexion a la base de datos

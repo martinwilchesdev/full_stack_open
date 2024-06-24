@@ -16,7 +16,7 @@ const noteSchema = mongoose.Schema({
  * Los objetos devueltos por mongoose pueden ser modificados mediante el metodo `toJson` del esquema utilizado por todas las instancias de los modelos producidos por ese esquema.
  * En el siguiente ejemplo se añade una nueva propiedad id al objeto retornado, a partir de la propiedad _id la cual es formateada a tipo string.
  * Se elimnan ademas las propiedades retornadas por el objeto _id y __v.
- * 
+ *
 */
 noteSchema.set('toJSON', {
     transform: (document, returnedObject) => {
