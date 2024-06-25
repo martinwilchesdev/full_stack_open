@@ -19,3 +19,16 @@ const noteSchema = new mongoose.Schema({
     },
     important: Boolean
 })
+
+const Note = mongoose.model('Note', noteSchema)
+
+/**
+ * La accion update omite por defecto las validaciones definidas en el esquema.
+ * Para admitir las validaciones es necesario añadir un objeto como tercer argumento, `{runValidators: true}`.
+*/
+app.put('/api/notes/:id', (req, res) => {
+    Note.findByIdAndUpdate(req.params.id, req.body, {runValidators: true})
+        .then(response => {
+            res.json(response)
+        })
+})
