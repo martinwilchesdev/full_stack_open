@@ -1,4 +1,4 @@
-// supertest es un paquete que permiten escribir pruebas para probar una API
+// supertest es un paquete que permiten escribir pruebas para probar API's
 const { test, after } = require('node:test')
 const supertest = require('supertest')
 const mongoose = require('mongoose')
