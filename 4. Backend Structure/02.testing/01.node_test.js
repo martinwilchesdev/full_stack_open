@@ -8,8 +8,10 @@
     }
  * */
 
-// tests/reverse.test.js // La libreria node:test espera por defecto que los nombres de los archivos de prueba contengan .test.
-
+/**
+ * La ejecucion de las pruebas se realiza mediante el comando `npm test`.
+ * La libreria node:test espera que los archivos ubicados en el directorio /test contenga la palabra test en el nombre del mismo api.test.js.
+*/
 const { test } = require('node:test')
 const assert = require('node:assert')
 
