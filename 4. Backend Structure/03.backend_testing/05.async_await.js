@@ -25,5 +25,5 @@ Note.find({})
 const main = async() => {
     // La palabra clave await no se puede ejecutar en cualquier parte del codigo JavaScript, ya que solo es posible su uso dentro de una funcion async
     const notes = await Note.find({})
-    console.log('operation returned the following notes', notes)    
+    console.log('operation returned the following notes', notes)
 }
