@@ -42,3 +42,8 @@ const Toggable = forwardRef(({ props, refs }) => {
         }
     })
 })
+
+/**
+ * Desde el componente donde se referencia el componente, en este caso App, se puede acceder a la funcion toggleVisibility() de la siguiente forma
+ *      noteFormRef.current.toggleVisibility()
+*/
