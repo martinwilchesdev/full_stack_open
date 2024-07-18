@@ -1,26 +1,33 @@
+/**
+ * -| App.jsx
+*/
 import { useRef } from 'react'
 
 // El hook useRef se utiliza para crear una referencia
 const App = () => {
     const noteFormRef = useRef()
 
-    const noteForm = () => {
+    return(
         /**
-         * noteFormRef se asigna al componente Toggable que contiene el formulario para crear la nota.
-         * La variable noteFormRef actua como una referencia al componente. Este hook asegura que se mantenga la misma referencia en todas las re-renderizaciones del componente.
+         * noteFormRef se asigna al componente Toggable que contiene como componente hijo el formulario encargado de crear nuevas notas.
+         * noteFormRef actua como una referencia al componente Toggable.
+         * Este hook asegura que se mantenga la misma referencia en todas las re-renderizaciones del componente.
         */
         <Toggable ref={noteFormRef}>
             <NoteForm />
         </Toggable>
-    }
+    )
 }
 
+/**
+ * -| Toggable.jsx
+*/
 import { useState, forwardRef, useImperativeHandle } from 'react'
 
 /**
- * La funcion que crea el componente esta envuelta dentro de una llamada a la funcion forwardRef. De esta manera el componente puede acceder a la referencia que le fue asignada.
- * El componente usa el hook useImperative para que la funcion toggleVisibility este disponible fuera del componente.
-*/
+ * La funcion que crea el componente esta envuelta dentro de una llamada a la funcion forwardRef().
+ * forwardRef permite que el componente pueda acceder a la referencia que le fue asignada.
+ */
 const Toggable = forwardRef(({ props, refs }) => {
     const [visible, setVisible] = useState()
 
@@ -28,7 +35,8 @@ const Toggable = forwardRef(({ props, refs }) => {
         setVisible(!visible)
     }
 
-    useImperativeHandle(() => {
+    // El componente usa el hook useImperativeHandle para que la funcion toggleVisibility este disponible fuera del componente.
+    useImperativeHandle(refs, () => {
         return {
             toggleVisibility
         }
