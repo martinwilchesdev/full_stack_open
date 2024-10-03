@@ -1,4 +1,4 @@
-// React vuelve a renderizar un componente cuando su estado es alterado
+// Mediante el hook useState() es posible definir variables con estado y la funcion encargada de modificar su estado
 import { useState } from 'react'
 
 const App = () => {
@@ -12,6 +12,7 @@ const App = () => {
         setCounter(counter++)
     }
 
+    // React vuelve a renderizar un componente cuando el estado de este es alterado
     return (
         <div>
             <p>Counter: {counter}</p>

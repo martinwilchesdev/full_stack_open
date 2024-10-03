@@ -1,8 +1,7 @@
-// Varios componentes deben reflejar los mismos datos cambiantes, por lo cual se debe elevar el estado compartido a su ancestro mas cercano
-
 import { useState } from 'react'
 
 const App = () => {
+    // Varios componentes deben reflejar los mismos datos cambiantes, por lo cual se debe elevar el estado compartido a su ancestro mas cercano
     const { counter, setCounter } = useState(0)
 
     const handleCounter = () => {
@@ -11,7 +10,9 @@ const App = () => {
 
     return (
         <div>
+            {/* Una variable con estado puede ser pasada  prop a un componente */}
             <Display counter={counter} />
+            {/* Las funciones encargadas de alterar una variable con estado tambien pueden ser pasadas como props */}
             <Button onClick={handleCounter} />
         </div>
     )

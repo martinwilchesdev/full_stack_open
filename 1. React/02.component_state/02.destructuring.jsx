@@ -10,7 +10,7 @@ const App = () => {
     )
 }
 
-// La desestructuracion permite asignar los valores de objetos y arreglos en variables individuales
+// La desestructuracion permite asignar  las props pasadas al componente hijo en variables individuales
 const Greeting = (props) => {
     const {name, age} = props
 
