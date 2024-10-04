@@ -6,11 +6,11 @@ const App = () => {
     /**
      * El hook useEffect permite que un componente se conecte y se sincronice con sistemas externos.
      * useEffect es la herramienta adecuada para usar cuando se obtienen datos de un servidor.
-     * 
+     *
      * Primero se ejecuta el cuerpo de la funcion que define el componente y asi el componente se renderiza por primera vez.
      * En este punto los datos no se han obtenido del servidor.
      * La funcion useEffect se ejecuta inmediatamente despues de la renderizacion.
-     * 
+     *
      * De forma predeterminada useEffect se ejecuta despues de cada renderizado completo, pero se puede elegir solo ejecutar cuando ciertos valores han cambiado.
      * */
     useEffect(() => {

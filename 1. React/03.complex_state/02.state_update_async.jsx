@@ -13,8 +13,8 @@ const App = () => {
             left: clicks.left + 1
         })
         /**
-         * La actualizacion del estado en React ocurre de manera asincrona, es decir no inmediatamente sino en algun momento antes que el componente se renderice nuevamente.
-         * Una forma de acceder al estado actualizado es asignandolo a una nueva variable que podra ser reutilizada nuevamente.
+         * La actualizacion del estado en React ocurre de manera asincrona, es decir no inmediatamente al ejecutarse la funcion que modifica la variable con estado.
+         * Una forma de acceder al estado actualizado es asignandolo a una nueva variable que podra ser reutilizada nuevamente de manera posterior.
         */
         const updatedLeft = clicks.left + 1
         setTotal(clicks.right + updatedLeft)

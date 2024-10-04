@@ -4,7 +4,7 @@ import Button from './components/Button'
 const App = () => {
     const [value, setValue] = useState(10)
 
-    // Los componentes pueden obtener la funcion del controlador de eventos a traves de una prop
+    // Los componentes hijos pueden obtener la funcion del controlador de eventos a traves de una prop enviada desde el componente padre
     return(
         <>
             {value}
