@@ -2,7 +2,7 @@
 
 ## REST
 
-En terminologia REST hace referencia a objetos individuales.
+En terminologia, REST hace referencia a objetos individuales.
 
     {
         "notes": [
@@ -19,7 +19,9 @@ En terminologia REST hace referencia a objetos individuales.
 
 En el JSON anterior cada objeto se identifica como un recurso. Cada recurso tiene una direccion unica asociada a su URL.
 
-    http://localhost:3001/notes/1
+    http://localhost:3001/notes/187
+
+La URL anterior permite acceder al recurso identificado con el id 187.
 
 La creacion de un nuevo recurso para almacenar una nota en el servidor se realiza mediante una solicitud `HTTP POST` a la URL *notes* de acuerdo con la convencion REST.
 
