@@ -9,5 +9,5 @@
  *      Si se hace una peticion HTTP PUT a la url /api/notes/10 y con la solicitud se envian los datos {content: 'no side effects', important: 'true'} el resultado es el mismo
  * independientemente de cuantas veces se envie la solicitud.
  *
- * POST es el unico tipo de solicitud HTTP que no es seguro ni idempotente.
+ * * POST es el unico tipo de solicitud HTTP que no es seguro ni idempotente.
 */

@@ -3,7 +3,8 @@ const app = express()
 
 /**
  * Los middleware son funciones que se pueden utilizar para manejar objetos request y response.
- * El middlware json-parser toma los datos sin procesar de las solicitudes que estan almacenadas en el objeto request, los parsea en un objeto de JavaScript y lo asigna en el request como una nueva propiedad body.
+ * Las funciones de middleware se ejecutan entre la peticion y la respuesta realizada el servidor.
+ * El middleware `json-parser` toma los datos sin procesar de las solicitudes que estan almacenadas en el objeto request, los parsea en un objeto de JavaScript y lo asigna en el request como una nueva propiedad body.
  * Cuando se tienen mas de un middleware se ejecutan uno por uno en el orden en el que se definieron en el codigo de la aplicacion.
 */
 app.use(express.json())
@@ -21,7 +22,7 @@ const requestLogger = (req, res, next) => {
 }
 
 // El middleware se utiliza de la siguiente forma
-app.use(requestLogger)
+app.use(requestLogger) // La funcion middleware se ejecutara para todas las rutas
 
 // Las funciones middleware deben definirse antes que las rutas cuando se quiere que estos sean ejecutados por los controladores de eventos de ruta
 app.get('/', (req, res) => {

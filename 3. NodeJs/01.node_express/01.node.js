@@ -16,6 +16,4 @@ console.log('Hello World')
  *
  * Las dependencias de un proyecto pueden ser actualizadas con el comando `$ npm update`.
  * Al iniciar a trabajar con un pryecto desde otro equipo, se pueden instalar todas las dependencias actualizadas definidas en el package.json con el comando `$ npm install`.
- *
- * Si la version del numero MAJOR las versiones nuevas deberian ser compatibles con versiones anteriores.
 */
