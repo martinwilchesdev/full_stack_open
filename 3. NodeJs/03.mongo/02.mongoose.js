@@ -6,20 +6,20 @@ if (process.argv.length < 3) {
     process.exit(1)
 }
 
-// La contraseña para la conexion a la base de datos es proporcionada como parametro al ejecutar el programa `$node mongo.js <password>`
+// En el siguiente ejemplo la contraseña para la conexion a la base de datos es proporcionada como tercer parametro al ejecutar el programa `$node mongo.js <password>`
 const password = process.argv[2]
 const databaseName = 'notesApp'
 
 /**
  * La contraseña es añadida a la cadena de conexion `<username>:<password>`.
- * El nombre de la base de datos personalizado se añade la URI antes de `?retryWrites`.
+ * El nombre de la base de datos personalizada se añade la URI antes de la cadena `?retryWrites`.
  */
-const url = `mongodb+srv://martindotdev:${password}@fullstackopencluster.asrmplj.mongodb.net/${databaseName}?retryWrites=true&w=majority&appName=FullStackOpenCluster`
+const url = `mongodb+srv://martindotdev:${password}@fullstackopencluster.asrmplj.mongodb.net/${databaseName}?retryWrites=true&w=majority&appName=FullStackOpenCluster` // URI proporcionada por MongoDB
 
 // Esta configuracion se relaciona con la forma en que mongoose maneja las consultas que contienen campos no definidos en el esquema del modelo
 mongoose.set('strictQuery', false)
 
-// Definicion de la conexion a la base de datos
+// Definicion de la conexion a la base de datos proporcionaando la URI de la base de datos
 mongoose.connect(url)
 
 // Un esquema le indica a mongoose como se almacenaran los objetos en la base de datos
@@ -61,7 +61,7 @@ note.save().then((result) => {
 
 /**
  * El metodo find() permite obtener los objetos de la base de datos.
- * El parametro del metodo es un objeto que expresa condiciones de busqueda. Al ser un objeto vacio {}, se botienen todos los objetos de la coleccion `notes`.
+ * El parametro del metodo es un objeto que expresa condiciones de busqueda. Al ser un objeto vacio {}, se obtienen todos los objetos de la coleccion `notes`.
 */
 Note.find({})
     .then(result => {

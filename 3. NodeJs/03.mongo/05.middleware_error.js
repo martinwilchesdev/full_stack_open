@@ -25,7 +25,7 @@ const Note = mongoose.model('Note', noteSchema)
 
 const app = express()
 
-// El manejo de errores puede implementarse en un solo lugar mediante un middleware
+// El manejo de errores puede implementarse en un bloque de codigo separado a traves de un middleware
 app.get('/api/notes/:id', (req, res, next) => {
     Note.findById(req.params.id)
         .then(note => {
@@ -39,8 +39,8 @@ app.get('/api/notes/:id', (req, res, next) => {
             console.log('Error:', error.message)
             /**
              * El error puede ser pasado o no a la funcion next().
-             * Si no se pasa el parametro, la ejecucion pasaria a la siguiente ruta o middleware.
-             * Si se invoca la funcion next() con el parametro, la ejecucion continua en el middleware del controlador de errores.
+             * Si no se pasa el parametro error a la funcion next(), la ejecucion pasaria a la siguiente ruta o middleware.
+             * Si se invoca la funcion next() con el parametro error, la ejecucion continua en el middleware del controlador de errores.
              * Los controladores de errores de Express son middleware que se definen con una funcion que acepta 4 parametros.
              *      const errorHandler = (error, req, res, next) => {}
              *
@@ -53,6 +53,7 @@ app.get('/api/notes/:id', (req, res, next) => {
 const errorHandler = (error, req, res, next) => {
     console.log(error.message)
 
+    // Dentro del middleware errorHandler se puede verificar el tipo de error y responder con un mensaje personalizado
     if (error.name === 'CastError') {
         res.status(400).json({ error: 'malformatted id' })
     }
