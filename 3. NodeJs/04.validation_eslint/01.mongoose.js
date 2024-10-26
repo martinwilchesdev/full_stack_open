@@ -11,7 +11,7 @@ const url = `mongodb+srv://martindotdev:${password}@fullstackopencluster.asrmplj
 mongoose.connect(url)
 
 const noteSchema = new mongoose.Schema({
-    // El campo content debe tener al menos cinco caracteres de longitud, es requerido y de tipo String.
+    // El campo content debe tener al menos cinco caracteres de longitud, es requerido y debe ser de tipo String.
     content: {
         type: String,
         minLength: 5,
@@ -24,7 +24,7 @@ const Note = mongoose.model('Note', noteSchema)
 
 /**
  * La accion update omite por defecto las validaciones definidas en el esquema.
- * Para admitir las validaciones es necesario añadir un objeto como tercer argumento, `{runValidators: true}`.
+ * Para admitir las validaciones es necesario añadir un objeto `{runValidators: true}` como tercer argumento.
 */
 app.put('/api/notes/:id', (req, res) => {
     Note.findByIdAndUpdate(req.params.id, req.body, {runValidators: true})
