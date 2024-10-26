@@ -3,10 +3,7 @@ const assert = require('node:assert')
 
 const average = require('../utils/for_testing').average
 
-/**
- * Se pueden usar bloques de descripcion para agrupar pruebas en colecciones logicas.
- * La salida de la prueba tambien usa el nombre del bloque describe.
-*/
+// Se pueden usar bloques de descripcion para agrupar pruebas en colecciones logicas
 describe('average', () => {
     test('of one value is the value itself', () => {
         assert.strictEqual(average([1]), 1)
