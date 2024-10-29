@@ -296,7 +296,7 @@ const App = () => {
 }
 ```
 
-** La actualizacion del estado en React ocurre de manera asincrona, es decir no inmediatamente al ejecutarse la funcion que modifica la variable con estado.
+> La actualizacion del estado en React ocurre de manera asincrona, es decir no inmediatamente al ejecutarse la funcion que modifica la variable con estado.
 
 ## Renderizado condicional
 
@@ -402,7 +402,7 @@ const App = () => {
 }
 ```
 
-````javascript
+```javascript
 // Componente hijo
 
 const Button = (props) => {
