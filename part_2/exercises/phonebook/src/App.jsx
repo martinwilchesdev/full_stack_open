@@ -24,10 +24,13 @@ const App = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
 
-    const checkName = persons.some(person => person.name.toUpperCase() === newName.toUpperCase()?.trim())
+    const getPerson = persons.find(person => person.name.toUpperCase() === newName.toUpperCase()?.trim())
 
-    if (checkName) {
-      window.alert(`${newName} is already added to phonebook`)
+    if (getPerson?.name) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one`)) {
+        services.updatePerson({id: getPerson.id, number: newNumber.trim()})
+        setPersons(persons.map(person => person.id === getPerson.id ? {...person, number: newNumber.trim()} : person))
+      }
       return
     }
 
