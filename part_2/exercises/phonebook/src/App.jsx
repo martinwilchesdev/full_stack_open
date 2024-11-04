@@ -1,14 +1,18 @@
+import Person from './components/Person'
+
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import services from './services/persons'
+import { v4 as uuidv4 } from 'uuid'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [filterName, setFilterName] = useState('')
   const [personsFilter, setPersonsFilter] = useState([])
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons')
+    services.getAll()
       .then(response => {
         setPersons(response.data)
       })
@@ -27,10 +31,21 @@ const App = () => {
       return
     }
 
-    setPersons([...persons, {
+    const newPerson = {
+      id: uuidv4(),
       name: newName.trim(),
       number: newNumber.trim()
-    }])
+    }
+
+    services.addPerson(newPerson)
+    setPersons([ ...persons, newPerson ])
+  }
+
+  const handleDelete = (person) => {
+    if (window.confirm(`Delete ${person.name}?`)) {
+      services.deletePerson(person.id)
+      setPersons(persons.filter(p => p.id !== person.id))
+    }
   }
 
   const handleNewName = (e) => {
@@ -42,7 +57,10 @@ const App = () => {
   }
 
   const handleFilterPersons = (e) => {
-    setPersonsFilter(persons.filter(person => person.name.toUpperCase().includes(e.target.value.toUpperCase()?.trim())))
+    const name = e.target.value
+
+    setFilterName(name)
+    setPersonsFilter(persons.filter(person => person.name.toUpperCase().includes(name.toUpperCase()?.trim())))
   }
 
   return (
@@ -65,11 +83,7 @@ const App = () => {
       </form>
       <h2>Numbers</h2>
       <ul>
-        {
-          personsFilter.length > 0 ?
-            personsFilter.map((person, index) => <li key={index}>{`${person.name}: ${person.number}`}</li>) :
-            persons.map((person, index) => <li key={index}>{`${person.name}: ${person.number}`}</li>)
-        }
+        <Person persons={filterName !== '' ? personsFilter : persons} onDelete={handleDelete} />
       </ul>
     </div>
   )
