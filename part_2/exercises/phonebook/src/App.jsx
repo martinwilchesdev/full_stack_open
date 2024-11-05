@@ -1,4 +1,5 @@
 import Person from './components/Person'
+import Notification from './components/Notification'
 
 import { useState, useEffect } from 'react'
 import services from './services/persons'
@@ -10,6 +11,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filterName, setFilterName] = useState('')
   const [personsFilter, setPersonsFilter] = useState([])
+  const [errorMessage, setErrorMessage] = useState(false)
+  const [notificationMessage, setNotificationMessage] = useState('')
 
   useEffect(() => {
     services.getAll()
@@ -29,7 +32,18 @@ const App = () => {
     if (getPerson?.name) {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one`)) {
         services.updatePerson({id: getPerson.id, number: newNumber.trim()})
-        setPersons(persons.map(person => person.id === getPerson.id ? {...person, number: newNumber.trim()} : person))
+          .then(response => {
+            setPersons(persons.map(person => person.id === getPerson.id ? {...person, number: response.data.number} : person))
+
+            setErrorMessage(false)
+            setNotificationMessage(`Updated ${newName}`)
+            setTimeout(() => setNotificationMessage(''), 4000)
+          })
+          .catch(error => {
+            setErrorMessage(true)
+            setNotificationMessage(`Information of ${newName} has already been removed from server`)
+            setTimeout(() => setNotificationMessage(''), 4000)
+          })
       }
       return
     }
@@ -41,7 +55,16 @@ const App = () => {
     }
 
     services.addPerson(newPerson)
-    setPersons([ ...persons, newPerson ])
+      .then(response => {
+        setPersons([ ...persons, response.data ])
+
+        setErrorMessage(false)
+        setNotificationMessage(`Added ${newName}`)
+        setTimeout(() => setNotificationMessage(''), 4000)
+      })
+      .catch(error => {
+        console.log(error)
+      })
   }
 
   const handleDelete = (person) => {
@@ -69,6 +92,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={notificationMessage} errorMessage={errorMessage} />
       <div>
         filter shown with <input onInput={handleFilterPersons} />
       </div>
