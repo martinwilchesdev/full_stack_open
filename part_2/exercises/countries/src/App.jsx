@@ -1,4 +1,5 @@
 import CountryInfo from './components/CountryInfo'
+import CountriesList from './components/CountriesList'
 
 import { useState, useEffect } from 'react'
 
@@ -26,6 +27,18 @@ const App = () => {
     setCountriesFilter(countries.filter(info => info.name.common.toLowerCase().includes(country.toLowerCase()?.trim())))
   }
 
+  const onHandleShowInfo = (country) => {
+    const countryName = country.toLowerCase()
+
+    services.getCountry(countryName)
+      .then(response => {
+        setCountriesFilter([response.data])
+      })
+      .catch(error => {
+        console.log(error)
+      })
+  }
+
   return(
     <div>
       <div>
@@ -37,9 +50,9 @@ const App = () => {
           filterCountry !== '' ?
             countriesFilter.length <= 10 ?
               countriesFilter.length === 1 ?
-                <CountryInfo country={countriesFilter[0]} /> :
-              <ol>{countriesFilter.map((country, index) => <li key={index}>{country.name.common}</li>)}</ol> :
-            'Too many matches, specify another filter'
+                <CountryInfo country={countriesFilter[0]} />
+              : <CountriesList countries={countriesFilter} onShowInfo={onHandleShowInfo} />
+            : 'Too many matches, specify another filter'
           : ''
         }
       </div>
