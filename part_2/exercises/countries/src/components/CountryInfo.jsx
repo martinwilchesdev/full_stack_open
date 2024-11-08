@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react'
 import services from '../services/countries'
 
 const CountryInfo = ({country}) => {
-    const api_key = import.meta.env.VITE_API_KEY
+    const API_KEY = import.meta.env.VITE_API_KEY
 
     const [temperatureImage, setTemperatureImage] = useState('')
     const [temperature, setTemperature] = useState('')
     const [wind, setWind] = useState('')
 
     useEffect(() => {
-        services.getWeather(api_key, country.capital)
+        services.getWeather(API_KEY, country.capital)
             .then(response => {
                 setTemperatureImage(response.data.current.condition.icon)
                 setTemperature(response.data.current.temp_c)
@@ -19,7 +19,7 @@ const CountryInfo = ({country}) => {
             .catch(error => {
                 console.log(error)
             })
-    }, country.capital)
+    }, [])
 
     return(
         <div>
