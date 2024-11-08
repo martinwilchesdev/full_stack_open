@@ -1,4 +1,26 @@
+import { useState, useEffect } from 'react'
+
+import services from '../services/countries'
+
 const CountryInfo = ({country}) => {
+    const api_key = import.meta.env.VITE_API_KEY
+
+    const [temperatureImage, setTemperatureImage] = useState('')
+    const [temperature, setTemperature] = useState('')
+    const [wind, setWind] = useState('')
+
+    useEffect(() => {
+        services.getWeather(api_key, country.capital)
+            .then(response => {
+                setTemperatureImage(response.data.current.condition.icon)
+                setTemperature(response.data.current.temp_c)
+                setWind(response.data.current.wind_kph)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }, country.capital)
+
     return(
         <div>
             <h1>{country.name.common}</h1>
@@ -15,6 +37,9 @@ const CountryInfo = ({country}) => {
             <img src={country.flags.png} alt="flag" />
             <div>
                 <h2>Weather in {country.capital}</h2>
+                <p>temperature {temperature} Celcius</p>
+                <img src={temperatureImage} alt="" />
+                <p>wind {wind} k/h</p>
             </div>
         </div>
     )
