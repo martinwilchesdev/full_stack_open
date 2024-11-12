@@ -296,3 +296,178 @@ El middleware se usa para capturar solicitudes realizadas a rutas inexistentes.
 ```javascript
 app.use(unknownEndpoint)
 ```
+
+# Despliegue a Internet
+
+Es posible permitir solicitudes de otros origenes utilizando el middleware `cors` de Node
+
+```javascript
+const express = require('express')
+
+const cors = require('cors')
+const app = express()
+
+app.use(express.json())
+app.use(cors())
+
+app.get('/', (req, res) => {
+    res.json({ content: 'Node.js' })
+})
+
+app.get('/api/notes', (req, res) => {
+    res.json([{
+        "id": "dce6",
+        "content": "HTML is kwai",
+        "important": false
+    }])
+})
+
+app.listen(3001)
+```
+
+## Politica de mismo origen y CORS
+
+`same origin policy` (politica de mismo origen). El origen de una URL es definido por la combinacion de protocolo (tambien conocido como esquema), nombre de host y puerto.
+
+> http://example.com:80/index.html
+
+- protocol: http
+- host: example.com
+- port: 80
+
+1. Cuando se visita un sitio web, el navegador emite una solicitud al servidor en el que esta alojado el sitio web.
+2. La respuestas enviada por el servidor es un archivo HTML que puede contener una o mas referencias a recursos externos alojados ya sea en el mismo servidor o en uno distinto.
+3. Cuando el navegador ve referencias a una URL en el HTML fuente, emite una solicitud a dicha URL, si la solicitud se realiza utilizando la URL desde la cual se obtuvo el HTML fuente, entonces el navegador procesa la solicitud sin problemas.
+4. Si el recurso se obtiene utilizando una URL que no comparte el mismo origen `(esquema, origen, puerto)` que el HTML fuente, el navegador tendra que verificar el encabezado de respuesta `Access-Control-Allow-Origin`, si este contiene `*` en la URL del HTML fuente, el navegador procesara la respuesta; de lo contrario el navegador se negara a procesarla y generara un error.
+
+Para habilitar solicitudes cruzadas legitimas (solicitudes a URLs que no comparten el mismo origen), W3C ideo un mecanismo llamado CORS (Cross-Origin Resource Sharing).
+
+## Frontend production build
+
+Las aplicaciones de React en el modo desarrollo estan configuradas para dar mensajes de error claros, mostrar inmediatamente los cambios en el navegador, etc.
+
+Al desplegar la aplicacion, se debe crear un `production build` (compilacion de produccion) o una version de la aplicacion que este optimizada para produccion.
+
+Una compilacion de produccion para aplicaciones nativas de `Vite` puede crearse con el siguiente comando
+
+```sh
+npm run build
+```
+
+Este comando crea un directorio llamado `dist`, el cual contiene el unico archivo HTML de la aplicacion y el directorio `assets`.
+
+Se genera una version minificada del codigo JavaScript de la aplicacion en el directorio `dist`. Aunque el codigo de la aplicacion este separado en varios archivos, el JavaScript se reducira a un solo archivo, incluyendo tambien sus dependencias.
+
+## Archivos estaticos desde el backend
+
+Para que Express muestre contenido estatico, por ejemplo una pagina index.html, archivos  jaavascript, etc, se utiliza el middleware integrado de Express llamado static.
+
+Siempre que Express reciba peticiones GET, primero verificara si el directorio `dist` contiene un archivo correspondiente a la direccion de la solicitud, en caso de encontrarlo Express lo devolvera.
+
+Las peticiones realizadas a la direccion `localhost:3001` mostraran el Frontend de React, mientras que las solicitudes GET realizadas a la direccion localhost:3001/api/notes seran manejadas por el backend.
+
+```javascript
+const express = require('express')
+const cors = require('cors')
+const app = express()
+
+let notes = [
+    {
+        "id": 1,
+        "content": "HTML is kwai",
+        "important": false
+    },
+    {
+        "id": 2,
+        "content": "JS is easy",
+        "important": false
+    },
+    {
+        "id": 3,
+        "content": "CSS is for styles",
+        "important": true
+    },
+    {
+        "id": 4,
+        "content": "React is not a framework",
+        "important": false
+    }
+]
+
+app.use(express.static('dist'))
+
+app.get('/api/notes', (req, res) => {
+    res.json(notes)
+})
+
+app.get('/api/notes/:id', (req, res) => {
+    singleNote = notes.find(note => note.id === Number(req.params.id))
+    res.json(singleNote)
+})
+```
+
+## Sirviendo archivos estaticos desde el Backend
+
+Una opcion para implementar el backend es copiar la compilacion de produccion (el directorio dist) a la raiz del repositorio del backend y configurar el backend para que muestre la pagina principal del Frontend (el archivo index.html) como su pagina principal.
+
+La compilacion de produccion del frontend se copiaria en la raiz del backend.
+
+```sh
+cp -r dist ./backend
+```
+
+Cada vez que se realice un cambio en el Frontend, se debe crear una nueva compilacion de produccion y copiarse en la raiz del repositorio del backend.
+
+Cuando se usa un navegador para ir a la direccion `/`, el servidor devuelve el archivo `index.html` del directorio `dist`.
+
+> El archivo `index.html` contiene instrucciones para obtener las hojas de estilo CSS y el codigo JavaScript compilados para produccion.
+
+## Optimizando el despliegue del Frontend
+
+Para crear una nueva compilacion de produccion del frontend sin trabajo manual adicional, se pueden agregar scripts npm al `package.json` del repositorio de backend.
+
+```json
+{
+    "scripts": {
+        // ...
+        "build:ui": "rm -rf dist && cd ../frontend/ && npm run build && cp -r dist ../backend"
+    }
+}
+```
+
+En Windows los comandos de shell estandar en `build:ui` no funcionan de forma nativa. En powershell se puede escribir el script como
+
+```sh
+"build:ui": "@powershell Remove-Item" -Recurse -Force dist && cd ../frontend && npm run build && @powershell Copy-Item dist -Recurse dist ../backend
+```
+
+El script `npm run build:ui` construye el Frontent y copia la version de produccion en la raiz del del backend.
+
+## Proxy
+
+Al compilar una aplicacion del Frontend, generalmente se modifica la direccion que apunta al Backend por una ruta relativa ya que tanto el backend como el frontend se ejecutaran en la misma direccion
+
+```javascript
+const baseUrl = '/api/notes'
+```
+
+Debido a que en el modo de desarrollo el Frontend esta en una direccion distinta a la del Backend, las solicitudes a este ultimo irian a la direccion incorrecta
+
+> localhost:5173/api/notes
+
+Los proyectos creados con Vite permiten solucionar este problema de forma simple, agregando la siguiente declaracion al archivo vite.config.js del repositorio del Frontend
+
+    export default defineConfig({
+        server: {
+            proxy: {
+                '/api': {
+                    target: 'localhost:3001',
+                    changeOrigin: true
+                }
+            }
+        }
+    })
+
+- Un proxy configura las reglas personalizadas para el servidor de desarrollo.
+- Espera un objeto de pares `{key: options}`.
+- Cualquier solicitud cuya ruta comience con esa `key` se enviara a ese destino especificado.
