@@ -471,3 +471,229 @@ Los proyectos creados con Vite permiten solucionar este problema de forma simple
 - Un proxy configura las reglas personalizadas para el servidor de desarrollo.
 - Espera un objeto de pares `{key: options}`.
 - Cualquier solicitud cuya ruta comience con esa `key` se enviara a ese destino especificado.
+
+# MongoDB
+
+## Bases de datos y colecciones
+
+MongoDB almacena datos a traves de documentos (documentos BSON), los cuales son agrupados en colecciones. Una base de datos almacena una o mas colecciones de documentos.
+
+### Colecciones
+
+Las colecciones se pueden asociar a lo que son las tablas en las bases de datos relacionales.
+
+### Documentos
+
+BSON es una representacion binaria de un documento JSON.
+
+    {
+        field1: value1,
+        field2: value2,
+        ...
+        fieldN: valueN
+    }
+
+El valor de un campo puede ser cualquier tipo de dato BSON, soportado, incluidos otros documentos.
+
+    var mydoc = {
+        _id: ObjectId("5098922343424f391"),
+        name: {first: "Alan", last: "Turing"},
+        contribs: ["Turing Machine", "Turing Test"],
+        views: NumberLong(12500000)
+    }
+
+#### Campos
+
+- El nombre de campo _id esta reservado para la llave primaria del documento.
+- El servidor permite nombres de campos que contengan el caracter ($) y (.).
+- Los nombres de los campos no pueden contener el valor null.
+
+## Mongoose
+
+Mongoose se puede describir como un mapeador de objetos a documentos (ODM).
+
+```javascript
+const mongoose = require('mongoose')
+```
+
+- La contraseña utilizada es es añadida a la cadena de conexion `<username>:<password>`.
+- El nombre de la base de datos personalizada se añade la URI antes de la cadena `?retryWrites`.
+
+```javascript
+const url = `mongodb+srv://martindotdev:${password}@fullstackopencluster.asrmplj.mongodb.net/${databaseName}?retryWrites=true&w=majority&appName=FullStackOpenCluster`
+```
+
+Configuracion relacionada con la forma en que mongoose maneja las consultas que contienen campos no definidos en el esquema del modelo
+
+```javascript
+mongoose.set('strictQuery', false)
+```
+
+Definicion de la conexion a la base de datos proporcionaando la URI de la base de datos
+
+```javascript
+mongoose.connect(url)
+```
+
+El esquema le indica a mongoose como se almacenaran los objetos en la base de datos
+
+```javascript
+const noteSchema = mongoose.Schema({
+    content: String,
+    important: Boolean
+})
+```
+
+En la definicion de un modelo, el primer parametro `Note` es el nombre singular del modelo.
+
+Por convencion de mongoose se nombran las colecciones de forma automatica como el plural, eg (notes), cuando el esquema se refiere a ellas en singular.
+
+```sh
+-| notesApp -> Base de datos
+    -| notes -> Coleccion
+        ...
+```
+
+```javascript
+const Note = mongoose.model('Note', noteSchema)
+```
+
+La idea de mongoose es que los datos almacenados en la base de datos reciban un esquema al nivel de la aplicacion que definan la forma de los documentos son almacenados en una coleccion determinada.
+
+Los modelos son funciones contructoras que crean nuevos objetos JavaScript basados en los parametros proporcionados.
+
+Dado que los objetos se crean con la funcion constructora del modelo, estos tienen acceso a todas sus propiedades, ademas de los metodos para guardar el objeto en la base de datos.
+
+```javascript
+const note = new Note({
+    content: 'HTML is easy',
+    important: true
+})
+```
+
+Los objetos se guardan en la base de datos a traves del metodo `save()`.
+
+```javascript
+note.save().then((result) => {
+    console.log('note saved!')
+
+    // Si la conexion con la base de datos no es cerrada el programa nunca termina su ejecucion
+    mongoose.connection.close()
+})
+```
+
+Cuando el objeto se guarda en la base de datos, el controlador de eventos `then()` se invoca y posteriormente se cierra la conexion de la base de datos.
+
+El metodo `find()` permite obtener objetos de la base de datos.
+
+```javascript
+Note.find({})
+    .then(result => {
+        console.log(result)
+        mongoose.connection.close()
+    })
+```
+
+El parametro del metodo `find()` es un objeto que expresa condiciones de busqueda. Al ser un objeto vacio `{}`, se obtienen todos los objetos de la coleccion `notes`.
+
+## toJson
+
+Los objetos devueltos por mongoose pueden ser modificados mediante el metodo `toJson` del esquema utilizado por todas las instancias de los modelos producidos por ese esquema.
+
+En el siguiente ejemplo se añade una nueva propiedad llamada `id` al objeto retornado, a partir de la propiedad `_id` la cual es formateada a tipo string. Se eliminan ademas las propiedades `_id` y `__v` retornadas por el objeto.
+
+```javascript
+noteSchema.set('toJSON', {
+    transform: (document, returnedObject) => {
+        returnedObject.id = returnedObject._id.toString(),
+        delete returnedObject._id,
+        delete returnedObject.__v
+    }
+})
+```
+
+## Manejo de errores
+
+El bloque `catch` se implementa para manejar los casos en los que la promesa devuelta por ejemplo por el metodo `findById()` es rechazada.
+
+Uno de los motivos de rechazo de la promesa puede darse cuando se pasa como parametro un tipo de id incorrecto.
+
+```javascript
+const express = require('express')
+const app = express()
+
+app.get('/api/notes/:id', (req, res) => {
+    Note.findById(req.params.id)
+        .then(note => {
+            if (note) {
+                res.json(note)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(error => {
+            console.log('Error:', error.message)
+            res.status(400).json({ error: 'malformatted id' })
+        })
+})
+```
+
+## Middleware error
+
+El manejo de errores puede implementarse en un bloque de codigo separado a traves de un middleware.
+
+- El error puede ser pasado o no a la funcion `next()`.
+- Si no se pasa el parametro error a la funcion `next()`, la ejecucion pasaria a la siguiente ruta o middleware en la cadena.
+- Si se invoca la funcion `next()` con el parametro error, la ejecucion continua en el middleware del controlador de errores.
+- Los controladores de errores de Express son middleware que se definen con una funcion que acepta 4 parametros.
+
+```javascript
+const errorHandler = (error, req, res, next) => {}
+```
+
+- Este debe ser el ultimo middleware cargado. Todas las rutas deben ser registradas antes que la definicion del controlador de errores.
+
+```javascript
+app.get('/api/notes/:id', (req, res, next) => {
+    Note.findById(req.params.id)
+        .then(note => {
+            if (note) {
+                res.json(note)
+            } else {
+                res.status(404).end()
+            }
+        })
+        .catch(error => {
+            console.log('Error:', error.message)
+            next(error)
+        })
+})
+
+const errorHandler = (error, req, res, next) => {
+    console.log(error.message)
+
+    if (error.name === 'CastError') {
+        res.status(400).json({ error: 'malformatted id' })
+    }
+}
+
+app.use(errorHandler)
+```
+
+## Orden de carga del middleware
+
+El orden de ejecucion de las funciones middleware es el mismo que el orden en que se cargan en Express con la funcion `app.use()`
+
+```javascript
+app.use(express.static('build'))
+app.use(express.json())
+app.use(logger)
+
+...
+
+app.use(unknownEndpoint)
+app.use(errorHandler)
+```
+
+- El middleware `json-parser` debe estar entre los primeros middleware cargados en Express para que asi los datos JSON enviados con las solicitudes HTTP esten disponibles para todos los controladores de ruta que los requieran.
+- El middleware para manejar las rutas no admitidas debe estar junto al ultimo middleware que se cargo en Express, justo antes del controlador de errores.
