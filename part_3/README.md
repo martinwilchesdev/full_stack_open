@@ -360,7 +360,11 @@ Se genera una version minificada del codigo JavaScript de la aplicacion en el di
 
 ## Archivos estaticos desde el backend
 
-Para que Express muestre contenido estatico, por ejemplo una pagina index.html, archivos  jaavascript, etc, se utiliza el middleware integrado de Express llamado static.
+Para que Express muestre contenido estatico, por ejemplo una pagina index.html, archivos javascript, etc, se utiliza el middleware integrado de Express llamado static.
+
+```javascript
+app.use(express.static('dist'))
+```
 
 Siempre que Express reciba peticiones GET, primero verificara si el directorio `dist` contiene un archivo correspondiente a la direccion de la solicitud, en caso de encontrarlo Express lo devolvera.
 
@@ -461,7 +465,7 @@ Los proyectos creados con Vite permiten solucionar este problema de forma simple
         server: {
             proxy: {
                 '/api': {
-                    target: 'localhost:3001',
+                    target: 'http://localhost:3001',
                     changeOrigin: true
                 }
             }
