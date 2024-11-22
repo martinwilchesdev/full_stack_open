@@ -24,14 +24,14 @@ app.use(morgan(function (tokens, req, res) {
     ].join(' ')})
 )
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
     Person.find({})
         .then(response => {
             const data = response
             res.json({persons: data})
         })
         .catch(error => {
-            console.log(error)
+            next(error)
         })
 })
 
@@ -44,15 +44,14 @@ app.get('/api/persons/:id', (req, res) => {
     }
 })
 
-app.delete('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(person => Number(person.id) === id)
-    if (person.length > 0) {
-        persons = persons.filter(person => Number(person.id) !== Number(id))
-        res.status(204).end()
-    } else {
-        res.status(404).end()
-    }
+app.delete('/api/persons/:id', (req, res, next) => {
+    Person.findByIdAndDelete(req.params.id)
+        .then(response => {
+            res.status(204).end()
+        })
+        .catch(error => {
+            next(error)
+        })
 })
 
 app.post('/api/persons', (req, res) => {
@@ -87,3 +86,13 @@ app.get('/info', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
+
+const errorHandler = (error, req, res, next) => {
+    if (error.name === 'CastError') {
+        res.status(400).send({'error': 'Malformatted id'})
+    } else {
+        res.status(500).end()
+    }
+}
+
+app.use(errorHandler)
