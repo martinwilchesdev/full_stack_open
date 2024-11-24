@@ -49,13 +49,13 @@ const App = () => {
     }
 
     const newPerson = {
-      id: uuidv4(),
       name: newName.trim(),
       number: newNumber.trim()
     }
 
     services.addPerson(newPerson)
       .then(response => {
+
         setPersons([ ...persons, response.data ])
 
         setErrorMessage(false)

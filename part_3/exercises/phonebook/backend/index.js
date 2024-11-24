@@ -54,26 +54,37 @@ app.delete('/api/persons/:id', (req, res, next) => {
         })
 })
 
-app.post('/api/persons', (req, res) => {
-    const id = Number(persons[persons.length -1]?.id) || 1
+app.post('/api/persons', (req, res, next) => {
     const body = req.body
 
     if (!body.name || !body.number) {
         res.status(400).json({"error": "Invalid name or number"})
     } else {
-        const newPerson = {
-            id: id + 1,
+        const person = new Person({
             name: body.name,
             number: body.number
-        }
+        })
 
-        if (persons.find(person => person.name === body.name)) {
-            res.status(409).json({"error": "name must be unique"})
-        } else {
-            persons = [...persons, newPerson]
-            res.status(201).end()
-        }
+        person.save()
+            .then(response => {
+                res.status(201).json(response)
+            })
+            .catch(error => {
+                next(error)
+            })
     }
+})
+
+app.patch('/api/persons/:id', (req, res, next) => {
+    const body = req.body
+
+    Person.findByIdAndUpdate(body.id, {number: body.number}, {new: true})
+        .then(response => {
+            res.status(201).json(response)
+        })
+        .catch(error => {
+            next(error)
+        })
 })
 
 app.get('/info', (req, res) => {
