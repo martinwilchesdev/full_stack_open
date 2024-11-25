@@ -14,7 +14,10 @@ mongoose.connect(mongo_uri)
     })
 
 const personSchema = mongoose.Schema({
-    name: String,
+    name: {
+        minLength: 3,
+        type: String
+    },
     number: String
 })
 

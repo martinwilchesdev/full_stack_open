@@ -701,3 +701,138 @@ app.use(errorHandler)
 
 - El middleware `json-parser` debe estar entre los primeros middleware cargados en Express para que asi los datos JSON enviados con las solicitudes HTTP esten disponibles para todos los controladores de ruta que los requieran.
 - El middleware para manejar las rutas no admitidas debe estar junto al ultimo middleware que se cargo en Express, justo antes del controlador de errores.
+
+## Mongoose
+
+mongoose dispone de una forma de validacion en el formato de los datos, antes de que estos se almacenen en la base de datos.
+
+Es posible definir reglas de validacion especificas para cada campo en el esquema.
+
+```javascript
+const noteSchema = new mongoose.Schema({
+    content: {
+        type: String,
+        minLength: 5,
+        required: true
+    },
+    important: Boolean
+})
+
+const Note = mongoose.model('Note', noteSchema)
+```
+
+> En el esquema anterior se definio que el campo content debe tener al menos cinco caracteres de longitud, debe ser requerido y debe ser de tipo String.
+
+La accion `update` omite por defecto las validaciones definidas en el esquema.
+
+Para admitir las validaciones es necesario añadir un objeto `{runValidators: true}` como tercer argumento.
+
+```javascript
+app.put('/api/notes/:id', (req, res) => {
+    Note.findByIdAndUpdate(req.params.id, req.body, {runValidators: true})
+        .then(response => {
+            res.json(response)
+        })
+})
+```
+
+## Lint
+
+Un lint o linter es una herramienta que detecta y marca errores en un lenguaje de programacion, incluidos los errores de estilo. Las herramientas de tipo lint generalmente realizan analisis estaticos del codigo fuente.
+
+### ESlint
+
+Instalacion
+
+```sh
+npm i eslint -D
+```
+
+Inicializar una configuracion predeterminada de ESlint
+
+```sh
+npx eslint --lint
+```
+
+La configuracion se guardara en el archivo `.eslintrc.js`.
+
+```json
+module.exports = {
+    // ...
+    "plugins": [
+        "@stylistic/js"
+    ],
+    "extends": "eslint:recommended",
+    "rules": {
+        "@stylistic/js/indent": [
+            "error",
+            2
+        ],
+        "@stylistic/js/linebreak-style": [
+            "error",
+            "unix"
+        ],
+        "@stylistic/js/quotes": [
+            "error",
+            "single"
+        ],
+        "@stylistic/js/semi": [
+            "error",
+            "never"
+        ],
+    }
+}
+```
+
+Extends `eslint:recommend` añade un conjunto de reglas recomendadas al proyecto.
+
+En el ejemplo anterior se han añadido reglas para la identacion, saltos de linea, guiones y puntos y comas. Estas 4 reglas de estilo estan definidas en el plugin de estilos de ESlint `(@stylistic/js)`.
+
+La inspeccion con eslint de un archivo se puede hacer mediante el siguiente comando:
+
+```sh
+npx eslint index.js
+```
+
+Es recomendable crear un script npm en el `package.json` para realizar el proceso de linting con eslint
+
+```json
+{
+    "scripts": {
+        "lint": "eslint ."
+    }
+}
+```
+
+Ahora el comando `npm run lint` comprueba todos los archivos del proyecto.
+
+En la raiz del proyecto se puede crear un archivo `.eslintignore` para evitar comprobar ciertos archivos y directorios, como por ejemplo el contenido de `dist`.
+
+ESlint permite añadir reglas adicionales, por ejemplo, evitar espacios adicionales al final de las lineas, que siempre haya un espacio antes y despues de las llaves, que haya un uso consistente de espacios en blanco en los parametros de funcion, en las funciones de flecha.
+
+```json
+{
+    ...
+    "rules": {
+        "eqeqeq": "error",
+        "no-trailing-spaces": "error",
+        "object-curly-spacing": [
+            "error", "always"
+        ],
+        "arrow-spacing": [
+            "error", {"before": true, "after": true}
+        ]
+    }
+}
+```
+
+La configuracion predeterminada de ESlint incluye un monton de reglas por defecto de `eslint:recommend`. La desactivacion de una regla se puede lograr definiendo su valor en 0 en el archivo de configuracion.
+
+```json
+{
+    ...
+    "rules": {
+        "no-console": 0
+    }
+}
+```
