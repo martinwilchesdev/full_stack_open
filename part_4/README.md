@@ -59,3 +59,94 @@ notesRouter.post('/:id', () => {
 ```
 
 La peticion POST realizada a la URL `http://localhost:3001/api/notes/1` se capturara por la ruta del controlador anteriormente definida
+
+## Testing de aplicaciones de Node
+
+Node dispone de una libreria de pruebas integrada llamada `node:test`.
+
+En el `package.json` se define el script que permitira la ejecucion de los tests.
+
+```json
+{
+    "scripts": {
+        "test": "node --test"
+    }
+}
+```
+
+La ejecucion de las pruebas se realiza mediante el siguiente comando.
+
+```javascript
+npm test
+```
+
+La libreria `node:test` espera que los archivos ubicados en el directorio `/test` contengan la palabra test en el nombre del mismo, por ejemplo `api.test.js`.
+
+```javascript
+const { test } = require('node:test') // Importacion de la libreria node:test
+const assert = require('node:assert') // Importacion de la libreria node:assert
+```
+
+La prueba se define con la palabra clave `test`, la libreria assert se utiliza para verificar los resultados de las funciones bajo prueba.
+
+El primer argumento de la funcion `test` es la descripcion de la prueba como una cadena de texto, la cual se mostrara por consola cuando la prueba sea ejecutada. El segundo argumento es una funcion que define la funcionalidad de la prueba a realizar.
+
+```javascript
+const reverse = require('../utils/for_testing').reverse
+
+test('reverse of martin', () => {
+    const result = reverse('martin') // La funcion reverse() retorna el string pasado como parametro con sus caracteres invertidos de izquierda a derecha
+
+    assert.strictEqual(result, 'nitram')
+})
+```
+
+Mediante la libreria `assert` se verifica el resultado de la prueba.
+
+El metodo `assert.strictEqual()` valida que el resultado (primer parametro) obtenido sea exactamente igual al resultado esperado (segundo parametro).
+
+## describe
+
+```javascript
+const { test, describe } = require('node:test')
+const assert = require('node:assert')
+
+const average = require('../utils/for_testing').average
+
+// Se pueden usar bloques de descripcion (describe) para agrupar pruebas en colecciones logicas
+describe('average', () => {
+    test('of only one value is the value itself', () => {
+        assert.strictEqual(average([1]), 1)
+    })
+
+    test('of many is calculated right', () => {
+        assert.strictEqual(average([1,2,3,4,5,6]), 3.5)
+    })
+
+    test('of empty array is zero', () => {
+        assert.strictEqual(average([]), 0)
+    })
+})
+```
+
+## assert
+
+assert.equal(1, '1') :: Valida la igualdad de 2 valores omitiendo los tipos.
+
+assert.strictEqual(1, '1') :: Valida la igualdad de 2 valores incluido el tipo de estos.
+
+assert.deepEqual({a: '1'}, {a: 1}) :: Similar a `.equal`. Se utiliza para validar la igualdad de objetos.
+
+assert.strictDepEqual({a: '1'}, {a: 1}) :: Similar a `.strictEqual`. Se utiliza para validar la igualdad de 2 objetos, incluyendo el tipo de sus valores.
+
+```javascript
+const { test, describe } = require('node:test')
+
+describe('sum of', () => {
+    test('2 plus 3', () => {
+        const sum = 2 + 3
+
+        assert.strictEqual(sum, 5) // true
+    })
+})
+```
