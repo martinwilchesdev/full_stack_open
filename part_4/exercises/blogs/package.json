@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "dev": "nodemon index.js"
+  },
+  "devDependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9"
+  },
+  "dependencies": {
+    "mongoose": "^8.9.0"
+  }
+}
