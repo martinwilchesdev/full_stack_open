@@ -131,13 +131,13 @@ describe('average', () => {
 
 ## assert
 
-assert.equal(1, '1') :: Valida la igualdad de 2 valores omitiendo los tipos.
+assert.equal(1, '1'), Valida la igualdad de 2 valores omitiendo los tipos.
 
-assert.strictEqual(1, '1') :: Valida la igualdad de 2 valores incluido el tipo de estos.
+assert.strictEqual(1, '1'), Valida la igualdad de 2 valores incluido el tipo de estos.
 
-assert.deepEqual({a: '1'}, {a: 1}) :: Similar a `.equal`. Se utiliza para validar la igualdad de objetos.
+assert.deepEqual({a: '1'}, {a: 1}), Similar a `.equal`. Se utiliza para validar la igualdad de objetos.
 
-assert.strictDepEqual({a: '1'}, {a: 1}) :: Similar a `.strictEqual`. Se utiliza para validar la igualdad de 2 objetos, incluyendo el tipo de sus valores.
+assert.strictDepEqual({a: '1'}, {a: 1}), Similar a `.strictEqual`. Se utiliza para validar la igualdad de 2 objetos, incluyendo el tipo de sus valores.
 
 ```javascript
 const { test, describe } = require('node:test')
@@ -149,4 +149,44 @@ describe('sum of', () => {
         assert.strictEqual(sum, 5) // true
     })
 })
+```
+
+# Probando el backend
+
+## Entorno de prueba
+
+La convencion de Node es definir el modo de ejecucion de la aplicacion con la variable de entorno `NODE_ENV=`.
+
+Es una practica comun definir modos separados para desarrollo y produccion.
+
+```json
+{
+    "scripts": {
+        "start": "NODE_ENV=production node index.js",
+        "dev": "NODE_ENV=development nodemon index.js",
+        "test": "NODE_ENV=development node --test",
+        "build:ui": "rm -rf ./dist && npm run build && rm -rf ./backend/dist && cp /dist ./backend"
+    }
+}
+```
+
+- Se ha especificado en el `package.json` el modo de la aplicacion para que sea _development_ en el script `npm run dev`, el cual utiliza _nodemon_.
+- Se especifica que el comando predeterminado `npm start` definira el modo como _production_.
+
+Los scripts anteriormente definidos por defecto no funcionaran en Windows. El error se corrige instalado el paquete `cross-env` como una dependencia de desarrollo.
+
+```bash
+npm install cross-env -D
+```
+
+La compatibilidad multiplataforma se logra utilizando la libreria `cross-env` en lo scripts definidos en el package.json.
+
+```json
+{
+    "scripts": {
+        "start": "cross-env NODE_ENV=production node index.js",
+        "dev": "cross-env NODE_ENV=development nodemon index.js",
+        "test": "cross-env NODE_ENV=development node --test",
+    }
+}
 ```
