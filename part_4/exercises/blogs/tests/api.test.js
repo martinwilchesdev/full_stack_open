@@ -18,6 +18,17 @@ test('there are one blog', async () => {
     assert.equal(result.length, 1)
 })
 
+test('validate property id', async () => {
+    const response = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+    const result = response.body.every(blog => Object.hasOwn(blog, 'id'))
+
+    assert(result)
+})
+
 after(async() => {
     mongoose.connection.close()
 })
