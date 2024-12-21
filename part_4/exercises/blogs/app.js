@@ -17,12 +17,15 @@ app.get('/api/blogs', async (request, response) => {
     response.json(blogs)
 })
 
-app.post('/api/blogs', (request, response) => {
+app.post('/api/blogs', async (request, response) => {
+    if (!request.body.title || !request.body.url) {
+        return response.status(400).end()
+    }
+
     const blog = new Blog(request.body)
 
-    blog.save().then((result) => {
-        response.status(201).json(result)
-    })
+    const blogs = await blog.save()
+    response.status(201).json(blogs)
 })
 
 module.exports = app
