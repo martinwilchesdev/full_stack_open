@@ -4,9 +4,7 @@ const assert = require('node:assert')
 
 const { mongoose } = require('mongoose')
 
-const Blog = require('../models/blog')
 const app = require('../app')
-
 const api = supertest(app)
 
 test('validate blogs lenght', async () => {
@@ -74,7 +72,7 @@ test('POST request object contains likes property', async () => {
 })
 
 test('server returns status code 400 if title and url property doesn\t exist on the request', async () => {
-    const response = await api
+    await api
         .post('/api/blogs')
         .send({
             author: 'Ada Lovelace',
