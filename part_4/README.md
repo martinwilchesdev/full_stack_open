@@ -365,3 +365,21 @@ beforeEach(async() => {
     await Promise.all(notesSaved)
 })
 ```
+
+## Ejecutar pruebas una por una
+
+```json
+"scripts": {
+    "test": "cross-env NODE_ENV=test node --test"
+}
+```
+
+```bash
+npm run test -- --test-only
+```
+
+El metodo `only` permite definir en el codigo que pruebas deben ser ejecutadas.
+
+````javascript
+test.only()
+```
