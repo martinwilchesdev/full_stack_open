@@ -38,10 +38,7 @@ app.delete('/api/blogs/:id', async (request, response) => {
 
 app.put('/api/blogs/:id', async (request, response) => {
     const blog = await Blog.findByIdAndUpdate(request.params.id, {
-        'author': request.body.author,
-        'likes': request.body.likes,
-        'title': request.body.title,
-        'url': request.body.url
+        'author': request.body.author
     }, {new: true}) // el objecto options {new: true} retorna el objeto de la basde datos actualizado
 
     response.json(blog)

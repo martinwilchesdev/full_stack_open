@@ -93,6 +93,59 @@ describe('when test is initially, database registers are deleted', () => {
                 .expect(400)
         })
     })
+
+    describe('delete the only blog that database contains', () => {
+        test('returns and empty object', async () => {
+            const blog = await api
+                .post('/api/blogs')
+                .send({
+                    author: 'Ada Lovelace',
+                    likes: 3,
+                    title: 'A test book title',
+                    url: 'http://testbook.com',
+                })
+                .set('Content-Type', 'application/json')
+                .expect(201)
+                .expect('Content-Type', /json/)
+
+            await api
+                .delete(`/api/blogs/${blog.body.id}`)
+                .expect(204)
+
+            const response = await api
+                .get('/api/blogs')
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+
+            assert.equal(response.body.length, 0)
+        })
+    })
+
+    describe('update the blog info', () => {
+        test.only('author updated', async () => {
+            const blog = await api
+                .post('/api/blogs')
+                .send({
+                    author: 'Ada Lovelace',
+                    likes: 3,
+                    title: 'A test book title',
+                    url: 'http://testbook.com',
+                })
+                .set('Content-Type', 'application/json')
+                .expect(201)
+                .expect('Content-Type', /json/)
+
+            const response = await api
+                .put(`/api/blogs/${blog.body.id}`)
+                .send({
+                    author: 'Hemingway'
+                })
+                .expect(200)
+                .expect('Content-Type', /application\/json/)
+
+            assert.equal(response.body.author, 'Hemingway')
+        })
+    })
 })
 
 after(async() => {
