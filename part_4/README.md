@@ -380,6 +380,129 @@ npm run test -- --test-only
 
 El metodo `only` permite definir en el codigo que pruebas deben ser ejecutadas.
 
-````javascript
+```javascript
 test.only()
 ```
+
+# Administracion de usuarios
+
+## Administracion de usuarios
+
+### Relacion uno a varios
+
+Un unico usuario puede crear multiples registros
+
+```bash
+USER |-< NOTE
+```
+
+En las bases de datos de documentos como MongoDB, se puede usar el `id` de los objetos para referenciar a documentos de otras colecciones, de forma similar al uso de claves externas en bases de datos relacionales.
+
+### Referencias entre columnas
+
+Cuando se trabaja con bases de datos relacionales, los registros de una tabla se referencian mediante claves foraneas con los registros de otra tabla.
+
+En las bases de datos de documentos se puede hacer lo mismo.
+
+```json
+[
+    {
+        username: 'milukas',
+        _id: 123456
+    },
+    {
+        username: 'hellas',
+        _id: 654321
+    }
+]
+```
+
+En el ejemplo anterior la coleccion `users` contiene 2 usuarios.
+
+```json
+[
+    {
+        content: 'HTML is easy',
+        important: false,
+        _id: 221222,
+        user: 123456
+    },
+    {
+        content: 'A proper dinosaur codes with Java',
+        important: true,
+        _id: 221223,
+        user: 654321
+    }
+]
+```
+
+La coleccion `notes` contiene 2 notas que contienen un campo `user`, el cual hace referencia a un usuario en la coleccion users.
+
+Las bases de datos de documentos ofrecen una forma diferente de organizar datos, por ejemplo anidando todo el conjunto de notas como parte de los documentos en la coleccion de usuarios.
+
+```json
+[
+    {
+        username: 'milukas',
+        _id: 123456,
+        notes: [
+            {
+                content: 'HTML is easy',
+                important: false
+            },
+            {
+                content: 'JavaScript is great',
+                important: true
+            }
+        ]
+    },
+    {
+        username: 'hellas',
+        _id: 654321,
+        notes: [
+            {
+                content: 'A proper dinosaur codes with Java',
+                important: true
+            }
+        ]
+    }
+]
+```
+
+En el esquema anterior las notas estarian estrechamente anidadas bajo cada usuario y la base de datos no generaria identificadores unicos para dichas notas.
+
+## Esquema de mongoose para usuarios
+
+```javascript
+const mongoose = require('mongoose')
+
+const userSchema = new mongoose.Schema({
+    username: String,
+    name: String,
+    passwordHash: String,
+    notes: [
+        {
+            type: mongoose.Schema.Types.ObjectId, // El tipo de campo ObjectId hace referencia a documentos de tipo Note
+            ref: 'Note'
+        }
+    ]
+})
+```
+
+En el ejemplo anterior, los identificadores de las notas se almacenaran dentro del documento del usuario como una matriz de `ID's` de Mongo.
+
+Dentro del modelo `Note` al que hace referencia el campo `notes` del esquema anterior, se debe añadir un nuevo campo que contenga informacion del usuario que creo dicha nota.
+
+```javascript
+const noteSchema = new mongoos.Schema({
+    ...,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
+})
+```
+
+A diferencia de las bases de datos relacionales, las referencias se almacenan en ambos documentos:
+- La nota hace referencia al usuario que la creo.
+- El usuario tienen una serie de referencias a todas las notas creadas por ellos.
