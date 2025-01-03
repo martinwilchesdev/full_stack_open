@@ -506,3 +506,176 @@ const noteSchema = new mongoos.Schema({
 A diferencia de las bases de datos relacionales, las referencias se almacenan en ambos documentos:
 - La nota hace referencia al usuario que la creo.
 - El usuario tienen una serie de referencias a todas las notas creadas por ellos.
+
+## Creando usuarios
+
+Nunca es recomendable almacenar contraseñas de texto plano sin cifrar en la base de datos.
+
+El paquete `bcrypt` permite generar hashes para las contraseñas.
+
+```bash
+npm install bcrypt
+```
+
+La creacion de usuarios ocurre de acuerdo a las convenciones RESTful, al realizar una solicitud de tipo `HTTP POST`
+
+```javascript
+const bcrypt = require('bcrypt')
+const User = require('/models/User')
+
+usersRouter.post('/', async (req, res) => {
+    const { name, password } = req.body
+
+    const saltRounds = 10
+    const passwordHash = bcrypt.hash(password, saltRounds)
+
+    const user = new User({
+        name,
+        password: passwordHash
+    })
+
+    await user.save()
+
+    res.status(201).json({message: 'User created!'})
+})
+```
+
+La contraseña enviada en la solicitud no se almacena en la base de datos, sino que se almacena el _hash_ de la contraseña generado con la funcion `bcrypt.hash`
+
+# Autenticacion basada en token
+
+1. El usuario llena el formulario de login con un usuario y una contraseña.
+    - Se presiona el boton de login.
+        - Se realiza una peticion `HTTP POST` a la ruta `/api/login` pasando como carga util [_username_, _password_].
+            - El backend genera un TOKEN que identifica el usuario (El TOKEN esta firmado digitalmente por lo cual es imposible falsificarlo).
+            - El TOKEN es retornado como cuerpo del mensaje.
+        - El navegador guarda el TOKEN.
+2. El usuario crea una nota.
+    - Se presiona el boton de crear nota.
+        - Se realiza una peticion `HTTP POST` a la ruta `/api/notes` [content] TOKEN in header.
+            - El backend identifica el usuario a partir del token.
+            - Se retorna una respuesta con el codigo de estado `201 Created`.
+
+La libreria `jsonwebtoken` es ampliamente utilizada para la generacion de tokens web JSON.
+
+```sh
+npm install jsonwebtoken
+```
+
+```javascript
+process.loadEnvFile()
+
+const jwt = require('jsonwebtoken')
+const express = require('express')
+const bcrypt = require('bcrypt')
+
+const User = require('User')
+
+const app = express()
+
+app.use(express.json())
+
+app.post('/login', async (req, res) => {
+    const [ username, password ] = req.body
+
+    const user = await User.findOne({ username })
+    const validatePassword = user == null
+        ? false
+        : bcrypt.compare(password, user.password)
+
+    if (!validatePassword) return res.status(401).json({ error: 'Invalid username or password' })
+
+    const userForToken = {
+        username: user.username,
+        id: user.id
+    }
+
+    const token = jwt.sign(userForToken, process.env.SECRET)
+
+    res.send({ token, username: user.username, name: user.name })
+})
+```
+
+Debido a que las contraseñas no se guardan en la base de datos, sino que se guardan _hashes_ calculados a partir de las contraseñas, el metodo `bcrypt.compare` se usa para verificar si la contraseña es correcta.
+
+Si la contraseña es correcta se crea un token con el metodo `jwt.sign`, el token contiene el nombre de usuario y el id del usuario en un formato firmado digitalmente. El token se firma usando una cadenma de variable `SECRET`.
+
+La firma digital garantiza que solo las partes que conocen el secreto puedan generar un token valido.
+
+## Limitacion de la creacion de registros a usuarios registrados
+
+Existen varias formas de enviar el token desde el navegador al servidor, una de ellas utilizando el encabezado `Authorization`. Este encabezado encabezado indica ademas el esquema de autenticacion utilizado, lo cual es util si el servidor ofrece varias formas de autenticacion.
+
+La identificacion del esquema le dice al servidor como se deben interpretar las credenciales adjuntas.
+
+### Esquema Bearer
+
+Si el token es por ejemplo la cadena `eyJhbGciOiJIUzI1NiIsInR5c2VybmFtZSI6Im1sdXVra2FpIiwiaW`, el encabezado de autorizacion tendra el valor.
+
+```sh
+Bearer eyJhbGciOiJIUzI1NiIsInR5c2VybmFtZSI6Im1sdXVra2FpIiwiaW
+```
+
+```javascript
+process.loadEnvFile()
+
+const jwt = require('jsonwebtoken')
+
+const getToken = (req) => {
+    const authorization = req.get('authorization')
+
+    if (authorization && authorization.startsWith('Bearer ')) {
+        return authorization.replace('Bearer ', '')
+    }
+
+    return null
+}
+
+app.post('/', async (req, res) => {
+    const body = req.body
+    const decodedToken = jwt.verify(getToken(req), process.env.SECRET)
+
+    if (!decodedToken.id) {
+        return res.status(401).json({ error: 'token invalid' })
+    }
+})
+```
+
+La funcion auxiliar `getToken()` aisla el token del encabezado `authorization`. La validez del token se comprueba mediante `jwt.verify`.
+
+El metodo `jwt.verify` decodifica el token o retorna el objeto en el que se baso.
+
+Si el token es invalido esta ausente, se genera un error `JsonWebTokenError`.
+
+## Problemas de la autenticacion basada en Tokens
+
+Limitar el periodo de validez de un token.
+
+```javascript
+app.post('/login', async () => {
+    // ...
+
+    const userForToken = {
+        name: user.name,
+        id: user.id
+    }
+
+    const token = jwt.sign(
+        userForToken,
+        process.env.SECRET,
+        { expiresIn: 60*60 } // El token expira en una hora
+    )
+
+    res.json({token, username: user.name})
+})
+```
+
+Una vez que el token caduca, la aplicacion necesita obtener un nuevo token.
+
+### server-side session
+
+Guardar informacion sobre cada token en la base de datos y verificar en cada solicitud de API si el derecho de acceso correspondiente al token sigue siendo valido.
+
+Cuando se utilizan sesiones del lado del servidor, el token suele ser una cadena aleatoria.
+
+Los nombres de usuario, contraseñas y las aplicaciones que utilizan la autenticacion basada en token siempre deben usarse en `HTTPS`.
