@@ -2,10 +2,12 @@ process.loadEnvFile()
 
 const mongoose = require('mongoose')
 const express = require('express')
+const bcrypt = require('bcrypt')
 const cors = require('cors')
 const app = express()
 
 const Blog = require('./models/blog')
+const User = require('./models/user')
 
 const { MONGO_URI } = require('./utils/config')
 
@@ -42,6 +44,24 @@ app.put('/api/blogs/:id', async (request, response) => {
     }, {new: true}) // el objecto options {new: true} retorna el objeto de la basde datos actualizado
 
     response.json(blog)
+})
+
+// Creacion de usuarios
+app.post('/api/users', async (req, res) => {
+    const { username, password, name } = req.body
+
+    const saltRounds = 10
+    const encryptedPassword = await bcrypt.hash(password, saltRounds)
+
+    const user = new User({
+        password: encryptedPassword,
+        username,
+        name
+    })
+
+    const savedUser = await user.save()
+
+    res.status(201).json(savedUser)
 })
 
 module.exports = app
