@@ -8,8 +8,9 @@ const User = require('../models/UserModel')
 UserRouter.post('/', async (req, res, next) => {
     const { username, password, name } = req.body
 
-    const saltRounds = 10
+    if (password && password.length < 3) throw new Error('the password is too short')
 
+    const saltRounds = 10
     const encryptedPassword = await bcrypt.hash(password, saltRounds)
 
     const user = new User({
