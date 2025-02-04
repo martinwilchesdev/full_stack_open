@@ -2,20 +2,38 @@ const BlogRouter = require('express').Router()
 
 // Modelo Blog
 const Blog = require('../models/BlogModel')
+const User = require('../models/UserModel')
 
 // Consultar los blogs contenidos en la base de datos
 BlogRouter.get('/', async (request, response) => {
-    const blogs = await Blog.find({})
+    // populate() permite referenciar documentos en otras colecciones
+    // El metodo populate se encadena despues de que el metodo `find` realiza la consulta inicial
+    const blogs = await Blog.find({}).populate('user')
+    /**
+     * El argumento dado al metodo populate() define que los ids que hacen referencia a objetos `user` en el campo user del documento Blog
+     * seran reemplazados por los documentos de `user` referenciados.
+    */
+
+
     response.json(blogs)
 })
 
 // Crear un nuevo blog
 BlogRouter.post('/', async (request, response) => {
-    if (!request.body.title || !request.body.url) {
-        return response.status(400).end()
-    }
+    const { author, likes, title, url } = request.body
 
-    const blog = new Blog(request.body)
+    if (!title || !url) return response.status(400).end()
+
+    // Se consultan todos los usuario
+    const user = await User.find({})
+
+    const blog = new Blog({
+        user: user[0], // Se asocia al blog el usuario ubicado en la primera posicion
+        author,
+        likes,
+        title,
+        url
+    })
 
     const blogs = await blog.save()
 
