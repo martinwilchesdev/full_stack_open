@@ -25,19 +25,22 @@ BlogRouter.post('/', async (request, response) => {
     if (!title || !url) return response.status(400).end()
 
     // Se consultan todos los usuario
-    const user = await User.find({})
+    const user = await User.findById(request.body.user)
 
     const blog = new Blog({
-        user: user[0], // Se asocia al blog el usuario ubicado en la primera posicion
+        user: user.id, // Se asocia al blog el usuario ubicado en la primera posicion
         author,
         likes,
         title,
         url
     })
 
-    const blogs = await blog.save()
+    const savedBlog = await blog.save()
 
-    response.status(201).json(blogs)
+    user.blogs = user.blogs.concat(savedBlog.id) // El id del blog creado se añade al array de blogs vinculados al usuario
+    await user.save()
+
+    response.status(201).json(savedBlog)
 })
 
 // Eliminar un blog
