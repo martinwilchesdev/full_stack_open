@@ -12,6 +12,9 @@ mongoose.connect(MONGO_URI)
 // Middlewares
 const middleware = require('./utils/middleware')
 
+// Middleware a ejecutar antes de las rutas
+app.use(middleware.tokenExtractor)
+
 // Controladores
 const loginRouter = require('./controllers/LoginController')
 const userRouter = require('./controllers/UserController')

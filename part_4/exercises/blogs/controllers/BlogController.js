@@ -1,8 +1,12 @@
+process.loadEnvFile()
+
 const BlogRouter = require('express').Router()
 
 // Modelo Blog
 const Blog = require('../models/BlogModel')
 const User = require('../models/UserModel')
+
+const jwt = require('jsonwebtoken')
 
 // Consultar los blogs contenidos en la base de datos
 BlogRouter.get('/', async (req, res) => {
@@ -22,13 +26,16 @@ BlogRouter.get('/', async (req, res) => {
 BlogRouter.post('/', async (req, res) => {
     const { author, likes, title, url } = req.body
 
-    if (!title || !url) return res.status(400).end()
+    // La validez del token se comprueba mediante `jwt.verify`. Este metodo devuelve el objeto en el que se baso el token
+    const decodedToken = jwt.verify(req.token, process.env.SECRET)
+
+    if (!decodedToken) return res.status(401).json({error: 'token invalid'})
 
     // Se consultan todos los usuario
-    const user = await User.findById(req.body.user)
+    const user = await User.findById(decodedToken.id)
 
     const blog = new Blog({
-        user: user.id, // Se asocia al blog el usuario ubicado en la primera posicion
+        user: user.id, // Se asocia al blog el usuario autenticado
         author,
         likes,
         title,
