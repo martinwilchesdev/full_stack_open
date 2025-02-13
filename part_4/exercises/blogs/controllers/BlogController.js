@@ -26,13 +26,8 @@ BlogRouter.get('/', async (req, res) => {
 BlogRouter.post('/', async (req, res) => {
     const { author, likes, title, url } = req.body
 
-    // La validez del token se comprueba mediante `jwt.verify`. Este metodo devuelve el objeto en el que se baso el token
-    const decodedToken = jwt.verify(req.token, process.env.SECRET)
-
-    if (!decodedToken) return res.status(401).json({error: 'token invalid'})
-
     // Se consultan todos los usuario
-    const user = await User.findById(decodedToken.id)
+    const user = await User.findById(req.user.id)
 
     const blog = new Blog({
         user: user.id, // Se asocia al blog el usuario autenticado
@@ -52,18 +47,13 @@ BlogRouter.post('/', async (req, res) => {
 
 // Eliminar un blog
 BlogRouter.delete('/:id', async (req, res) => {
-    // Se decodifica el token mediante el metodo `jwt.token`
-    const decodedToken = jwt.verify(req.token, process.env.SECRET)
-
-    if (!decodedToken) return res.status(401).json({ error: 'invalid token' })
-
     // Se obtiene el blog a eliminar. Mediante `populate` se obtienen los datos del usuario relacionado al blog
     const blog = await Blog.findById(req.params.id).populate('user')
 
     if (!blog) return res.status(404).json({ error: 'the provided blog doesn\'t exist' })
 
     // Se valida que el id del usuario obtenido del token decodificado sea igual al id del usuario asociado al blog
-    if (decodedToken.id === blog.user.id) {
+    if (req.user.id === blog.user.id) {
         // Se elimina el blog de la base de datos
         const deletedBlog = await Blog.findByIdAndDelete(req.params.id)
 
