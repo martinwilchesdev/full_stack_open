@@ -8,6 +8,8 @@ const { mongoose } = require('mongoose')
 const app = require('../app')
 const api = supertest(app)
 
+const TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFzYXJtaWVudG8iLCJpZCI6IjY3YWMwN2JmYWNiZGE1ZjIxODA3ZTkzZiIsImlhdCI6MTczOTQxMzYzMX0.oJLm2u0McWlcce0V6DWDn9BgLiAuGiohSwMIAFZ92YU'
+
 describe('when test is initially, database registers are deleted', () => {
     beforeEach(async () => {
         await Blog.deleteMany({})
@@ -17,6 +19,7 @@ describe('when test is initially, database registers are deleted', () => {
         test('validate blogs lenght', async () => {
             const response = await api
                 .get('/api/blogs')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(200)
                 .expect('Content-Type', /application\/json/)
 
@@ -28,6 +31,7 @@ describe('when test is initially, database registers are deleted', () => {
         test('validate property id', async () => {
             const response = await api
                 .get('/api/blogs')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(200)
                 .expect('Content-Type', /application\/json/)
 
@@ -41,6 +45,7 @@ describe('when test is initially, database registers are deleted', () => {
         test('validate creation of a new blog', async () => {
             const initialBlogs = await api
                 .get('/api/blogs')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(200)
                 .expect('Content-Type', /application\/json/)
 
@@ -53,11 +58,13 @@ describe('when test is initially, database registers are deleted', () => {
                     url: 'http://testbook.com',
                 })
                 .set('Content-Type', 'application/json')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(201)
                 .expect('Content-Type', /json/)
 
             const blogsUpdated = await api
                 .get('/api/blogs')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(200)
                 .expect('Content-Type', /application\/json/)
 
@@ -76,6 +83,7 @@ describe('when test is initially, database registers are deleted', () => {
                     url: 'http://testbook.com',
                 })
                 .set('Content-Type', 'application/json')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(201)
                 .expect('Content-Type', /json/)
 
@@ -90,6 +98,7 @@ describe('when test is initially, database registers are deleted', () => {
                     likes: 3
                 })
                 .set('Content-Type', 'application/json')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(400)
         })
     })
@@ -105,15 +114,18 @@ describe('when test is initially, database registers are deleted', () => {
                     url: 'http://testbook.com',
                 })
                 .set('Content-Type', 'application/json')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(201)
                 .expect('Content-Type', /json/)
 
             await api
                 .delete(`/api/blogs/${blog.body.id}`)
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(204)
 
             const response = await api
                 .get('/api/blogs')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(200)
                 .expect('Content-Type', /application\/json/)
 
@@ -132,6 +144,7 @@ describe('when test is initially, database registers are deleted', () => {
                     url: 'http://testbook.com',
                 })
                 .set('Content-Type', 'application/json')
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(201)
                 .expect('Content-Type', /json/)
 
@@ -140,6 +153,7 @@ describe('when test is initially, database registers are deleted', () => {
                 .send({
                     author: 'Hemingway'
                 })
+                .set({Authorization: `Bearer ${TOKEN}`})
                 .expect(200)
                 .expect('Content-Type', /application\/json/)
 

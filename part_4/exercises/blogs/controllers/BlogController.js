@@ -26,6 +26,8 @@ BlogRouter.get('/', async (req, res) => {
 BlogRouter.post('/', async (req, res) => {
     const { author, likes, title, url } = req.body
 
+    if (!title && !url) return res.status(400).json({ error: 'missing title and url' })
+
     // Se consultan todos los usuario
     const user = await User.findById(req.user.id)
 
