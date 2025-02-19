@@ -1,6 +1,7 @@
 import axios from 'axios'
 const baseUrl = '/api/blogs'
 
+// helper para extraer el token de autorizacion registrado en el localStorage
 import tokenHelper from '../helpers/authToken.jsx'
 
 let headers = null

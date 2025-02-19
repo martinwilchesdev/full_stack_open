@@ -13,14 +13,17 @@ const App = () => {
     const [password, setPassword] = useState('')
 
     useEffect(() => {
-        const authUser = localStorage.getItem('userBlogsApp')
+        // Obtener la informacion del usuario guardada en el localStorage
+        const authUser = localStorage.getItem('user_auth_blogs')
         if (authUser) {
+            // Si hay informacion del usuario registrada en el localStorage se asigna al state user
             const loggedUser = JSON.parse(authUser)
             setUser(loggedUser)
         }
     }, [])
 
     useEffect(() => {
+        // Si el usuario se encuentra logueado se consultan los blogs
         if (user) blogService.getAll().then((response) => setBlogs(response))
     }, [user])
 
@@ -35,13 +38,21 @@ const App = () => {
                     password,
                 })
                 .then((response) => {
-                    setUser(response)
-                    localStorage.setItem('userBlogsApp', JSON.stringify(response))
+                    setUser(response.data)
+                    localStorage.setItem(
+                        'user_auth_blogs',
+                        JSON.stringify(response.data)
+                    )
                 })
                 .catch((e) => {
                     console.log('Error: ', e.response.data.error)
                 })
         }
+    }
+
+    const handleLogout = () => {
+        localStorage.removeItem('user_auth_blogs')
+        setUser(null)
     }
 
     if (user === null) {
@@ -58,6 +69,7 @@ const App = () => {
 
     return (
         <div>
+            <button onClick={handleLogout}>logout</button>
             <h2>blogs</h2>
             {blogs.map((blog) => (
                 <Blog key={blog.id} blog={blog} />
