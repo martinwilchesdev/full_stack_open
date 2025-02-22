@@ -62,6 +62,10 @@ const App = () => {
                     `a new blog ${blogInfo.title} by ${blogInfo.author}`
                 )
                 setNotificationColor('green')
+
+                setUrl('')
+                setTitle('')
+                setAuthor('')
             })
             .catch((error) => {
                 console.log('Error: ', error.response.data.message)
