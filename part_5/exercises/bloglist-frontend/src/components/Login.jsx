@@ -1,3 +1,5 @@
+import Notification from './Notification'
+
 const Login = (props) => {
     const handleUserName = (ev) => props.onHandleUsername(ev.target.value)
     const handlePassword = (ev) => props.onHandlePassword(ev.target.value)
@@ -5,6 +7,12 @@ const Login = (props) => {
     return (
         <div>
             <h2>log in to application</h2>
+            {props.notificationMessage !== '' ? (
+                <Notification
+                    notificationColor={props.notificationColor}
+                    notificationMessage={props.notificationMessage}
+                />
+            ) : null}
             <form onSubmit={props.onHandleLogin}>
                 <div>
                     <label>username</label>

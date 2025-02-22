@@ -5,8 +5,8 @@ const getAuthToken = () => {
 
     return {
         headers: {
-            'Authorization': `Bearer ${token}` || null
-        }
+            Authorization: `Bearer ${token}` || null,
+        },
     }
 }
 

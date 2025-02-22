@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react'
+
+import Notification from './components/Notification'
+import CreateBlogs from './components/CreateBlogs'
 import Login from './components/Login'
 import Blog from './components/Blog'
 
@@ -6,11 +9,22 @@ import blogService from './services/blogs'
 import loginService from './services/login'
 
 const App = () => {
-    const [blogs, setBlogs] = useState([])
-    const [user, setUser] = useState(null)
+    // mensaje y color de la notificacion
+    const [notificationMessage, setNotificationMessage] = useState('')
+    const [notificationColor, setNotificationColor] = useState('')
 
+    // blogs a listar
+    const [blogs, setBlogs] = useState([])
+
+    // informacion del usuario
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+    const [user, setUser] = useState(null)
+
+    // informacion de los blogs
+    const [author, setAuthor] = useState('')
+    const [title, setTitle] = useState('')
+    const [url, setUrl] = useState('')
 
     useEffect(() => {
         // Obtener la informacion del usuario guardada en el localStorage
@@ -24,8 +38,36 @@ const App = () => {
 
     useEffect(() => {
         // Si el usuario se encuentra logueado se consultan los blogs
-        if (user) blogService.getAll().then((response) => setBlogs(response))
+        if (user)
+            blogService.getAll().then((response) => setBlogs(response.data))
     }, [user])
+
+    const handleCreateBlog = (ev) => {
+        ev.preventDefault()
+
+        const newBlog = {
+            author,
+            title,
+            url,
+        }
+
+        blogService
+            .create(newBlog)
+            .then((response) => {
+                const blogInfo = response.data
+
+                setBlogs(blogs.concat(blogInfo))
+
+                setNotificationMessage(
+                    `a new blog ${blogInfo.title} by ${blogInfo.author}`
+                )
+                setNotificationColor('green')
+            })
+            .catch((error) => {
+                console.log('Error: ', error.response.data.message)
+            })
+            .finally(resetNotification())
+    }
 
     // Realizar login del usuario
     const handleLogin = (ev) => {
@@ -45,8 +87,10 @@ const App = () => {
                     )
                 })
                 .catch((e) => {
-                    console.log('Error: ', e.response.data.error)
+                    setNotificationMessage('wrong username or password')
+                    setNotificationColor('red')
                 })
+                .finally(resetNotification())
         }
     }
 
@@ -55,22 +99,49 @@ const App = () => {
         setUser(null)
     }
 
+    const resetNotification = () => {
+        setTimeout(() => {
+            setNotificationMessage('')
+            setNotificationColor('')
+        }, 4000)
+    }
+
     if (user === null) {
         return (
-            <Login
-                username={username}
-                password={password}
-                onHandleLogin={handleLogin}
-                onHandlePassword={setPassword}
-                onHandleUsername={setUsername}
-            />
+            <>
+                <Login
+                    username={username}
+                    password={password}
+                    onHandleLogin={handleLogin}
+                    onHandlePassword={setPassword}
+                    onHandleUsername={setUsername}
+                    notificationColor={notificationColor}
+                    notificationMessage={notificationMessage}
+                />
+            </>
         )
     }
 
     return (
         <div>
-            <button onClick={handleLogout}>logout</button>
             <h2>blogs</h2>
+            {notificationMessage !== '' ? (
+                <Notification
+                    notificationColor={notificationColor}
+                    notificationMessage={notificationMessage}
+                />
+            ) : null}
+            <span>{user.name} logged in</span>
+            <button onClick={handleLogout}>logout</button>
+            <CreateBlogs
+                url={url}
+                title={title}
+                author={author}
+                onHandleUrl={setUrl}
+                onHandleTitle={setTitle}
+                onHandleAuthor={setAuthor}
+                onHandleCreateBlog={handleCreateBlog}
+            />
             {blogs.map((blog) => (
                 <Blog key={blog.id} blog={blog} />
             ))}

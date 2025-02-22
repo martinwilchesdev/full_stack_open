@@ -6,8 +6,6 @@ const BlogRouter = require('express').Router()
 const Blog = require('../models/BlogModel')
 const User = require('../models/UserModel')
 
-const jwt = require('jsonwebtoken')
-
 // Consultar los blogs contenidos en la base de datos
 BlogRouter.get('/', async (req, res) => {
     // populate() permite referenciar documentos en otras colecciones
@@ -18,8 +16,9 @@ BlogRouter.get('/', async (req, res) => {
      * seran reemplazados por los documentos de `user` referenciados.
     */
 
+    const userBlogs = blogs.filter(blog => blog.user.id.toString() == req.user.id) // Se retornan los blogs que estan asociados al usuario logueado
 
-    res.json(blogs)
+    res.json(userBlogs)
 })
 
 // Crear un nuevo blog
@@ -33,8 +32,8 @@ BlogRouter.post('/', async (req, res) => {
 
     const blog = new Blog({
         user: user.id, // Se asocia al blog el usuario autenticado
+        likes: likes || 100,
         author,
-        likes,
         title,
         url
     })
