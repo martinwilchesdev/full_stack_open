@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 
 import Notification from './components/Notification'
 import CreateBlogs from './components/CreateBlogs'
-import Login from './components/Login'
+import LoginForm from './components/LoginForm'
 import Blog from './components/Blog'
 
 import blogService from './services/blogs'
@@ -113,7 +113,7 @@ const App = () => {
     if (user === null) {
         return (
             <>
-                <Login
+                <LoginForm
                     username={username}
                     password={password}
                     onHandleLogin={handleLogin}

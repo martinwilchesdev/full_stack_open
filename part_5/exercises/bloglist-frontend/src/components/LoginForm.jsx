@@ -1,6 +1,6 @@
 import Notification from './Notification'
 
-const Login = (props) => {
+const LoginForm = (props) => {
     const handleUserName = (ev) => props.onHandleUsername(ev.target.value)
     const handlePassword = (ev) => props.onHandlePassword(ev.target.value)
 
@@ -36,4 +36,4 @@ const Login = (props) => {
     )
 }
 
-export default Login
+export default LoginForm
